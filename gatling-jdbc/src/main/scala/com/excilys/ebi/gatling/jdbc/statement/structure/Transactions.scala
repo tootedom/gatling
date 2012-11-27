@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.excilys.ebi.gatling.core
+package com.excilys.ebi.gatling.jdbc.statement.structure
 
-import scalaz._
-import Scalaz._
+import com.excilys.ebi.gatling.core.structure.ChainBuilder
+import com.excilys.ebi.gatling.core.session.Session
+import com.excilys.ebi.gatling.jdbc.util.JdbcHelper.withTransaction
 
-package object session {
+object Transactions {
 
-	val NOOP_EXPRESSION = (s: Session) => "".success
-
-	type Expression[T] = Session => Validation[String, T]
-	def undefinedSeqIndexMessage(name: String, index: Int) = "Seq named '" + name + "' is undefined for index " + index
-	def undefinedSessionAttributeMessage(name: String) = "No attribute named '" + name + "' is defined"
+	def transaction(chain : ChainBuilder): Session => Session = session => withTransaction(session)(chain)
 }

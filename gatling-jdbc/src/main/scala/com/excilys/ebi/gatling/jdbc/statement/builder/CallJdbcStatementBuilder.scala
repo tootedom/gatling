@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.excilys.ebi.gatling.core
+package com.excilys.ebi.gatling.jdbc.statement.builder
 
-import scalaz._
-import Scalaz._
+import com.excilys.ebi.gatling.core.session.Expression
+import com.excilys.ebi.gatling.jdbc.statement.CALL
 
-package object session {
+object CallJdbcStatementBuilder {
 
-	val NOOP_EXPRESSION = (s: Session) => "".success
+	def apply(statementName: Expression[String],statement: String) = new CallJdbcStatementBuilder(JdbcAttributes(statementName,statement,CALL,Nil,None))
+}
 
-	type Expression[T] = Session => Validation[String, T]
-	def undefinedSeqIndexMessage(name: String, index: Int) = "Seq named '" + name + "' is undefined for index " + index
-	def undefinedSessionAttributeMessage(name: String) = "No attribute named '" + name + "' is defined"
+class CallJdbcStatementBuilder(jdbcAttributes: JdbcAttributes) extends AbstractJdbcStatementBuilder[CallJdbcStatementBuilder](jdbcAttributes) {
+
+	private[jdbc] def newInstance(jdbcAttributes: JdbcAttributes) = new CallJdbcStatementBuilder(jdbcAttributes)
 }

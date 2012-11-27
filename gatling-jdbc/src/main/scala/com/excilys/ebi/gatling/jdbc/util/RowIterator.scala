@@ -13,16 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.excilys.ebi.gatling.core
+package com.excilys.ebi.gatling.jdbc.util
 
-import scalaz._
-import Scalaz._
+import java.sql.ResultSet
 
-package object session {
+object RowIterator {
 
-	val NOOP_EXPRESSION = (s: Session) => "".success
+	implicit def ResultSet2RowIterator(resultSet: ResultSet) = new RowIterator(resultSet)
 
-	type Expression[T] = Session => Validation[String, T]
-	def undefinedSeqIndexMessage(name: String, index: Int) = "Seq named '" + name + "' is undefined for index " + index
-	def undefinedSessionAttributeMessage(name: String) = "No attribute named '" + name + "' is defined"
+}
+
+// TODO : use an implicit class after upgrade to Scala 2.10
+class RowIterator(resultSet: ResultSet) extends Iterator[Array[AnyRef]] {
+
+	val columnCount = resultSet.getMetaData.getColumnCount
+
+	def hasNext = !resultSet.isLast
+
+	def next = {
+		resultSet.next
+		(for (i <- 1 to columnCount) yield (resultSet.getObject(i))).toArray
+	}
 }

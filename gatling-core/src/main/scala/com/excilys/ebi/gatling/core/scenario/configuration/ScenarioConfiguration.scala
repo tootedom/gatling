@@ -15,7 +15,6 @@
  */
 package com.excilys.ebi.gatling.core.scenario.configuration
 
-import com.excilys.ebi.gatling.core.config.ProtocolConfiguration
 import akka.util.Duration
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 
