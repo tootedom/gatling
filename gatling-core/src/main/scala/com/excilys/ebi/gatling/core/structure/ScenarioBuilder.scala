@@ -49,8 +49,7 @@ class ScenarioBuilder(name: String, val actionBuilders: List[ActionBuilder]) ext
 	 */
 	private[core] def build(scenarioConfiguration: ScenarioConfiguration): Scenario = {
 
-		val endingScenarioBuilder = newInstance(UserLifecycleBuilder.end :: actionBuilders)
-		val entryPoint = endingScenarioBuilder.buildChainedActions(null, scenarioConfiguration.protocolRegistry)
+		val entryPoint = buildChain(UserLifecycleBuilder.end, scenarioConfiguration.protocolRegistry)
 		new Scenario(name, entryPoint, scenarioConfiguration)
 	}
 }

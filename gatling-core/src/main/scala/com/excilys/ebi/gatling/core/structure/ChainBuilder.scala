@@ -54,5 +54,5 @@ class ChainBuilder(val actionBuilders: List[ActionBuilder], next: ActorRef) exte
 	 * @param scenarioId the id of the current scenario
 	 * @return the first action of the scenario to be executed
 	 */
-	private[core] def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry) = buildChainedActions(next, protocolConfigurationRegistry)
+	private[core] def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry) = buildChain(next, protocolConfigurationRegistry)
 }

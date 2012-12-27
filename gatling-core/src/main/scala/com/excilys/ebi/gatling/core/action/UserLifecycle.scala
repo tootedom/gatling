@@ -15,23 +15,35 @@
  */
 package com.excilys.ebi.gatling.core.action
 
-import com.excilys.ebi.gatling.core.result.message.RecordEvent.END
+import com.excilys.ebi.gatling.core.result.message.RecordEvent.{ END, START }
 import com.excilys.ebi.gatling.core.result.terminator.Terminator
 import com.excilys.ebi.gatling.core.result.writer.DataWriter
 import com.excilys.ebi.gatling.core.session.Session
 
 import akka.actor.ActorRef
+import grizzled.slf4j.Logging
 
-class UserLifecycle(event: String, val next: ActorRef) extends Action {
+object UserLifecycle extends Logging {
 
-	def execute(session: Session) {
-
+	def logEvent(session: Session, event: String) {
 		DataWriter.user(session.scenarioName, session.userId, event)
 		info(event + " user #" + session.userId)
+	}
+}
 
-		event match {
-			case END => Terminator.endUser
-			case _ => next ! session
-		}
+object EndUser extends BaseActor {
+
+	def receive = {
+		case session: Session =>
+			UserLifecycle.logEvent(session, END)
+			Terminator.endUser
+	}
+}
+
+class StartUser(val next: ActorRef) extends Action {
+
+	def execute(session: Session) {
+		UserLifecycle.logEvent(session, START)
+		next ! session
 	}
 }

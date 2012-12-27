@@ -15,20 +15,19 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.action.{ UserLifecycle, system }
+import com.excilys.ebi.gatling.core.action.{ EndUser, StartUser, system }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
-import com.excilys.ebi.gatling.core.result.message.RecordEvent.{ END, START }
 
 import akka.actor.{ ActorRef, Props }
 
 object UserLifecycleBuilder {
 
-	val start = new UserLifecycleBuilder(START)
+	val start = new StartUserBuilder
 
-	val end = new UserLifecycleBuilder(END)
+	val end = system.actorOf(Props(EndUser))
 }
 
-class UserLifecycleBuilder(event: String) extends ActionBuilder {
+class StartUserBuilder extends ActionBuilder {
 
-	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new UserLifecycle(event, next)))
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new StartUser(next)))
 }

@@ -42,7 +42,7 @@ trait Action extends BaseActor {
 	override def preRestart(reason: Throwable, message: Option[Any]) {
 		error("Action " + this + " crashed, forwarding user to next one", reason)
 		message match {
-			case Some(session: Session) if (next != null) => next ! session.setFailed
+			case Some(session: Session) => next ! session.setFailed
 			case _ =>
 		}
 	}
