@@ -15,7 +15,7 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.action.{ Bypass, SimpleAction, system }
+import com.excilys.ebi.gatling.core.action.{ Bypassable, SimpleAction, system }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 import com.excilys.ebi.gatling.core.session.Session
 
@@ -39,5 +39,5 @@ object BypassSimpleActionBuilder {
  */
 class BypassSimpleActionBuilder(sessionFunction: Session => Session) extends ActionBuilder {
 
-	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new SimpleAction(sessionFunction, next) with Bypass))
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new SimpleAction(sessionFunction, next) with Bypassable))
 }
