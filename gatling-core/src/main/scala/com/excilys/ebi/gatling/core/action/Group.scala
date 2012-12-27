@@ -15,16 +15,21 @@
  */
 package com.excilys.ebi.gatling.core.action
 
-import com.excilys.ebi.gatling.core.session.Session
+import com.excilys.ebi.gatling.core.result.writer.DataWriter
+import com.excilys.ebi.gatling.core.session.{ Expression, Session }
 
 import akka.actor.ActorRef
+import scalaz._
 
-class SwitchAction(strategy: () => ActorRef, val next: ActorRef) extends Action with Bypassable {
+class Group(name: Expression[String], event: String, val next: ActorRef) extends Action {
 
 	def execute(session: Session) {
+		val resolvedName = name(session) match {
+			case Success(name) => name
+			case Failure(message) => error("Could not resolve group name: " + message); "no-group-name"
+		}
 
-		val nextAction = strategy()
-		nextAction ! session
+		DataWriter.group(session.scenarioName, resolvedName, session.userId, event)
+		next ! session
 	}
 }
-

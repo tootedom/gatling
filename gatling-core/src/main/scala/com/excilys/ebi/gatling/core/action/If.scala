@@ -15,23 +15,29 @@
  */
 package com.excilys.ebi.gatling.core.action
 
-import com.excilys.ebi.gatling.core.result.message.RecordEvent.END
-import com.excilys.ebi.gatling.core.result.terminator.Terminator
-import com.excilys.ebi.gatling.core.result.writer.DataWriter
 import com.excilys.ebi.gatling.core.session.Session
 
 import akka.actor.ActorRef
 
-class UserAction(event: String, val next: ActorRef) extends Action {
+/**
+ * A conditional Action
+ *
+ * @constructor create an IfAction
+ * @param condition the condition that decides whether to execute thenNext or elseNext
+ * @param thenNext the chain of actions executed if condition evaluates to true
+ * @param elseNext chain of actions executed if condition evaluates to false
+ * @param next chain of actions executed if condition evaluates to false and elseNext equals None
+ */
+class If(condition: Session => Boolean, thenNext: ActorRef, elseNext: Option[ActorRef], val next: ActorRef) extends Action with Bypassable {
 
+	/**
+	 * Evaluates the condition and decides what to do next
+	 *
+	 * @param session the session of the virtual user
+	 */
 	def execute(session: Session) {
 
-		DataWriter.user(session.scenarioName, session.userId, event)
-		info(event + " user #" + session.userId)
-
-		event match {
-			case END => Terminator.endUser
-			case _ => next ! session
-		}
+		val nextAction = if (condition(session)) thenNext else elseNext.getOrElse(next)
+		nextAction ! session
 	}
 }

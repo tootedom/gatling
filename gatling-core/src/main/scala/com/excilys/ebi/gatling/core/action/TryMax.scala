@@ -15,21 +15,15 @@
  */
 package com.excilys.ebi.gatling.core.action
 
-import com.excilys.ebi.gatling.core.result.writer.DataWriter
-import com.excilys.ebi.gatling.core.session.{ Expression, Session }
+import com.excilys.ebi.gatling.core.session.Session
 
 import akka.actor.ActorRef
-import scalaz._
+import grizzled.slf4j.Logging
 
-class GroupAction(groupName: Expression[String], event: String, val next: ActorRef) extends Action {
+object TryMax extends Logging {
 
-	def execute(session: Session) {
-		val resolvedGroupName = groupName(session) match {
-			case Success(name) => name
-			case Failure(message) => error("Could not resolve group name: " + message); "no-group-name"
-		}
-
-		DataWriter.group(session.scenarioName, resolvedGroupName, session.userId, event)
-		next ! session
+	def apply(times: Int, counterName: String, next: ActorRef) = {
+		val continueCondition = (s: Session) => s.safeGetAs[Int](counterName).map(counterValue => counterValue == 0 || (s.isFailed && counterValue < times))
+		new While(continueCondition, counterName, next)
 	}
 }

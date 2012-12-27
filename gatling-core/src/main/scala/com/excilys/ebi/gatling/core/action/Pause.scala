@@ -25,10 +25,10 @@ import akka.util.duration.longToDurationLong
 /**
  * PauseAction provides a convenient means to implement pause actions based on random distributions.
  *
+ * @param delayInMillis a function that can be used to generate a delays for the pause action
  * @param next the next action to execute, which will be notified after the pause is complete
- * @param generateDelayInMillis a function that can be used to generate a delays for the pause action
  */
-class PauseAction(val next: ActorRef, generateDelayInMillis: () => Long) extends Action with Bypassable {
+class Pause(delayInMillis: () => Long, val next: ActorRef) extends Action with Bypassable {
 	
 	/**
 	 * Generates a duration if required or use the one given and defer
@@ -38,7 +38,7 @@ class PauseAction(val next: ActorRef, generateDelayInMillis: () => Long) extends
 	 */
 	def execute(session: Session) {
 
-		val durationInMillis: Long = generateDelayInMillis()
+		val durationInMillis: Long = delayInMillis()
 		val timeShift = session.getTimeShift
 
 		if (durationInMillis > timeShift) {

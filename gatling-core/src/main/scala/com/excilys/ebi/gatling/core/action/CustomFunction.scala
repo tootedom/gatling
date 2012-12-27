@@ -20,24 +20,15 @@ import com.excilys.ebi.gatling.core.session.Session
 import akka.actor.ActorRef
 
 /**
- * A conditional Action
+ * Hook for interacting with the Session
  *
- * @constructor create an IfAction
- * @param condition the condition that decides whether to execute thenNext or elseNext
- * @param thenNext the chain of actions executed if condition evaluates to true
- * @param elseNext chain of actions executed if condition evaluates to false
- * @param next chain of actions executed if condition evaluates to false and elseNext equals None
+ * @constructor Constructs a SimpleAction
+ * @param f a function for manipulating the Session
+ * @param next the action to be executed after this one
  */
-class IfAction(condition: Session => Boolean, thenNext: ActorRef, elseNext: Option[ActorRef], val next: ActorRef) extends Action with Bypassable {
+class CustomFunction(f: Session => Session, val next: ActorRef) extends Action {
 
-	/**
-	 * Evaluates the condition and decides what to do next
-	 *
-	 * @param session the session of the virtual user
-	 */
 	def execute(session: Session) {
-
-		val nextAction = if (condition(session)) thenNext else elseNext.getOrElse(next)
-		nextAction ! session
+		next ! f(session)
 	}
 }

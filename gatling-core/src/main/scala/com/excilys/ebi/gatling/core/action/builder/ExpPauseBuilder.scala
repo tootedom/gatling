@@ -15,36 +15,26 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.action.{ PauseAction, system }
+import com.excilys.ebi.gatling.core.action.{ Pause, system }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 import com.excilys.ebi.gatling.core.util.NumberHelper.createExpRandomLongGenerator
 
 import akka.actor.{ ActorRef, Props }
 import akka.util.Duration
 
-object ExpPauseActionBuilder {
-
-	/**
-	 * Creates an initialized ExpPauseActionBuilder with a 1 second delay and a
-	 * time unit in Seconds.  A 1 second delay is used because exponential distributions
-	 * are not defined at zero and 1 is the smallest positive Long.
-	 */
-	def apply(meanDuration: Duration) = new ExpPauseActionBuilder(meanDuration)
-}
-
 /**
- * Builder for the 'pauseExp' action.  Creates PauseActions for a user with a delay coming from
+ * Builder for the 'pauseExp' action.  Creates Pauses for a user with a delay coming from
  * an exponential distribution with the specified mean duration.
  *
- * @constructor create a new ExpPauseActionBuilder
+ * @constructor create a new ExpPauseBuilder
  * @param meanDuration mean duration of the generated pause
  */
-class ExpPauseActionBuilder(meanDuration: Duration) extends ActionBuilder {
+class ExpPauseBuilder(meanDuration: Duration) extends ActionBuilder {
 
 	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
 		val meanDurationInMillis = meanDuration.toMillis
-		val delayGenerator: () => Long = createExpRandomLongGenerator(meanDurationInMillis)
+		val delayInMillis: () => Long = createExpRandomLongGenerator(meanDurationInMillis)
 
-		system.actorOf(Props(new PauseAction(next, delayGenerator)))
+		system.actorOf(Props(new Pause(delayInMillis, next)))
 	}
 }

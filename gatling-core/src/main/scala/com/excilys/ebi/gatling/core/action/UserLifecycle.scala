@@ -15,15 +15,23 @@
  */
 package com.excilys.ebi.gatling.core.action
 
+import com.excilys.ebi.gatling.core.result.message.RecordEvent.END
+import com.excilys.ebi.gatling.core.result.terminator.Terminator
+import com.excilys.ebi.gatling.core.result.writer.DataWriter
 import com.excilys.ebi.gatling.core.session.Session
 
 import akka.actor.ActorRef
-import grizzled.slf4j.Logging
 
-object TryMaxAction extends Logging {
+class UserLifecycle(event: String, val next: ActorRef) extends Action {
 
-	def apply(times: Int, next: ActorRef, counterName: String): WhileAction = {
-		val continueCondition = (s: Session) => s.safeGetAs[Int](counterName).map(counterValue => counterValue == 0 || (s.isFailed && counterValue < times))
-		new WhileAction(continueCondition, next, counterName)
+	def execute(session: Session) {
+
+		DataWriter.user(session.scenarioName, session.userId, event)
+		info(event + " user #" + session.userId)
+
+		event match {
+			case END => Terminator.endUser
+			case _ => next ! session
+		}
 	}
 }

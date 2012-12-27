@@ -15,21 +15,20 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.action.{ GroupAction, system }
+import com.excilys.ebi.gatling.core.action.{ UserLifecycle, system }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 import com.excilys.ebi.gatling.core.result.message.RecordEvent.{ END, START }
-import com.excilys.ebi.gatling.core.session.Expression
 
 import akka.actor.{ ActorRef, Props }
 
-object GroupActionBuilder {
+object UserLifecycleBuilder {
 
-	def start(groupName: Expression[String]) = new GroupActionBuilder(groupName, START)
+	val start = new UserLifecycleBuilder(START)
 
-	def end(groupName: Expression[String]) = new GroupActionBuilder(groupName, END)
+	val end = new UserLifecycleBuilder(END)
 }
 
-class GroupActionBuilder(groupName: Expression[String], event: String) extends ActionBuilder {
+class UserLifecycleBuilder(event: String) extends ActionBuilder {
 
-	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new GroupAction(groupName, event, next)))
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new UserLifecycle(event, next)))
 }

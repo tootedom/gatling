@@ -15,25 +15,20 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.action.{ Switch, system }
+import java.util.UUID.randomUUID
+
+import com.excilys.ebi.gatling.core.action.{ TryMax, system }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 import com.excilys.ebi.gatling.core.structure.ChainBuilder
-import com.excilys.ebi.gatling.core.util.RoundRobin
 
 import akka.actor.{ ActorRef, Props }
 
-class RoundRobinSwitchBuilder(possibilities: List[ChainBuilder]) extends ActionBuilder {
-
-	require(possibilities.size >= 2, "Can't build a round robin switch with less than 2 possibilities")
+class TryMaxBuilder(times: Int, loopNext: ChainBuilder, counterName: String) extends ActionBuilder {
 
 	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
-
-		val possibleActions = possibilities.map(_.withNext(next).build(protocolConfigurationRegistry))
-
-		val rr = RoundRobin(possibleActions)
-
-		val strategy = () => rr.next
-
-		system.actorOf(Props(new Switch(strategy, next)))
+		val tryMaxActor = system.actorOf(Props(TryMax(times, counterName, next)))
+		val loopContent = loopNext.withNext(tryMaxActor).build(protocolConfigurationRegistry)
+		tryMaxActor ! loopContent
+		tryMaxActor
 	}
 }

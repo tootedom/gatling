@@ -15,28 +15,27 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import java.util.UUID.randomUUID
-
-import com.excilys.ebi.gatling.core.action.{ TryMaxAction, system }
+import com.excilys.ebi.gatling.core.action.{ system, If }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
+import com.excilys.ebi.gatling.core.session.Session
 import com.excilys.ebi.gatling.core.structure.ChainBuilder
 
-import akka.actor.{ ActorRef, Props }
+import akka.actor.{ Props, ActorRef }
 
-object TryMaxActionBuilder {
-
-	/**
-	 * Creates an initialized TryMaxActionBuilder
-	 */
-	def apply(times: Int, loopNext: ChainBuilder, counterName: String) = new TryMaxActionBuilder(times, loopNext, counterName)
-}
-
-class TryMaxActionBuilder(times: Int, loopNext: ChainBuilder, counterName: String) extends ActionBuilder {
+/**
+ * Builder for IfAction
+ *
+ * @constructor create a new IfBuilder
+ * @param condition condition of the if
+ * @param thenNext chain that will be executed if condition evaluates to true
+ * @param elseNext chain that will be executed if condition evaluates to false
+ */
+class IfBuilder(condition: Session => Boolean, thenNext: ChainBuilder, elseNext: Option[ChainBuilder]) extends ActionBuilder {
 
 	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
-		val tryMaxActor = system.actorOf(Props(TryMaxAction(times, next, counterName)))
-		val loopContent = loopNext.withNext(tryMaxActor).build(protocolConfigurationRegistry)
-		tryMaxActor ! loopContent
-		tryMaxActor
+		val actionTrue = thenNext.withNext(next).build(protocolConfigurationRegistry)
+		val actionFalse = elseNext.map(_.withNext(next).build(protocolConfigurationRegistry))
+
+		system.actorOf(Props(new If(condition, actionTrue, actionFalse, next)))
 	}
 }

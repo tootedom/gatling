@@ -15,23 +15,24 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.action.{ PauseAction, system }
+import com.excilys.ebi.gatling.core.action.{ Bypassable, CustomFunction, system }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
+import com.excilys.ebi.gatling.core.session.Session
 
 import akka.actor.{ ActorRef, Props }
 
-object CustomPauseActionBuilder {
-
-	def apply(delayGenerator: () => Long) = new CustomActionPauseBuilder(delayGenerator)
-}
-
 /**
- * Builder for the custom 'pause' action.
+ * Builder for action on top of a custom function
  *
- * @constructor create a new PauseActionBuilder
- * @param delayGenerator the strategy for computing the duration of the generated pause, in milliseconds
+ * @constructor creates a CustomFunctionBuilder
+ * @param f the function that will be executed by the simple action
+ * @param bypassable if the resulting action is to be bypassable
  */
-class CustomActionPauseBuilder(delayGenerator: () => Long) extends ActionBuilder {
+class CustomFunctionBuilder(f: Session => Session, bypassable: Boolean = false) extends ActionBuilder {
 
-	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new PauseAction(next, delayGenerator)))
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) =
+		if (bypassable)
+			system.actorOf(Props(new CustomFunction(f, next) with Bypassable))
+		else
+			system.actorOf(Props(new CustomFunction(f, next)))
 }

@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.excilys.ebi.gatling.core.action.builder
+package com.excilys.ebi.gatling.core.action
 
-import com.excilys.ebi.gatling.core.action.{ UserAction, system }
-import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
-import com.excilys.ebi.gatling.core.result.message.RecordEvent.{ END, START }
+import com.excilys.ebi.gatling.core.session.Session
 
-import akka.actor.{ ActorRef, Props }
+import akka.actor.ActorRef
 
-object UserActionBuilder {
+class Switch(strategy: () => ActorRef, val next: ActorRef) extends Action with Bypassable {
 
-	val start = new UserActionBuilder(START)
+	def execute(session: Session) {
 
-	val end = new UserActionBuilder(END)
+		val nextAction = strategy()
+		nextAction ! session
+	}
 }
 
-class UserActionBuilder(event: String) extends ActionBuilder {
-
-	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new UserAction(event, next)))
-}

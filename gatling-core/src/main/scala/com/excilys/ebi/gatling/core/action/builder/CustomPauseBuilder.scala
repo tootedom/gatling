@@ -13,27 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.excilys.ebi.gatling.core.action
+package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.session.Session
+import com.excilys.ebi.gatling.core.action.{ Pause, system }
+import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 
-import akka.actor.ActorRef
+import akka.actor.{ ActorRef, Props }
 
 /**
- * Hook for interacting with the Session
+ * Builder for the custom 'pause' action.
  *
- * @constructor Constructs a SimpleAction
- * @param sessionFunction a function for manipulating the Session
- * @param next the action to be executed after this one
+ * @constructor create a new PauseActionBuilder
+ * @param delayInMillis the strategy for computing the duration of the generated pause, in milliseconds
  */
-class SimpleAction(sessionFunction: Session => Session, val next: ActorRef) extends Action {
+class CustomPauseBuilder(delayInMillis: () => Long) extends ActionBuilder {
 
-	/**
-	 * Applies the function to the Session
-	 *
-	 * @param session the session of the virtual user
-	 */
-	def execute(session: Session) {
-		next ! sessionFunction(session)
-	}
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new Pause(delayInMillis, next)))
 }
