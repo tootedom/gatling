@@ -15,7 +15,7 @@
  */
 package com.excilys.ebi.gatling.core.structure
 
-import com.excilys.ebi.gatling.core.action.builder.BypassSimpleActionBuilder
+import com.excilys.ebi.gatling.core.action.builder.SimpleActionBuilder
 import com.excilys.ebi.gatling.core.feeder.Feeder
 import com.excilys.ebi.gatling.core.result.terminator.Terminator
 
@@ -30,14 +30,14 @@ trait Feeds[B] extends Execs[B] with Logging {
 	 */
 	def feed(feeder: Feeder[_]): B = {
 
-		val byPass = BypassSimpleActionBuilder(session => {
+		val byPass = SimpleActionBuilder(session => {
 			if (!feeder.hasNext) {
 				error("Feeder is now empty, stopping engine")
 				Terminator.forceTermination
 			}
 
 			session.set(feeder.next)
-		})
+		}, true)
 
 		newInstance(byPass :: actionBuilders)
 	}

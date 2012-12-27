@@ -15,11 +15,11 @@
  */
 package com.excilys.ebi.gatling.core.action.builder
 
-import com.excilys.ebi.gatling.core.action.{ system, SimpleAction }
+import com.excilys.ebi.gatling.core.action.{ Bypassable, SimpleAction, system }
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 import com.excilys.ebi.gatling.core.session.Session
 
-import akka.actor.{ Props, ActorRef }
+import akka.actor.{ ActorRef, Props }
 
 object SimpleActionBuilder {
 
@@ -27,8 +27,9 @@ object SimpleActionBuilder {
 	 * Creates a simple action builder
 	 *
 	 * @param sessionFunction the function that will be executed by the built simple action
+	 * @param bypassable if the resulting action is to be bypassable
 	 */
-	def apply(sessionFunction: Session => Session) = new SimpleActionBuilder(sessionFunction)
+	def apply(sessionFunction: Session => Session, bypassable: Boolean = false) = new SimpleActionBuilder(sessionFunction, bypassable)
 }
 
 /**
@@ -37,7 +38,11 @@ object SimpleActionBuilder {
  * @constructor creates a SimpleActionBuilder
  * @param sessionFunction the function that will be executed by the simple action
  */
-class SimpleActionBuilder(sessionFunction: Session => Session) extends ActionBuilder {
+class SimpleActionBuilder(sessionFunction: Session => Session, bypassable: Boolean) extends ActionBuilder {
 
-	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new SimpleAction(sessionFunction, next)))
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) =
+		if (bypassable)
+			system.actorOf(Props(new SimpleAction(sessionFunction, next) with Bypassable))
+		else
+			system.actorOf(Props(new SimpleAction(sessionFunction, next)))
 }
