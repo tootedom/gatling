@@ -28,7 +28,7 @@ object SimpleActionBuilder {
 	 *
 	 * @param sessionFunction the function that will be executed by the built simple action
 	 */
-	def apply(sessionFunction: Session => Session) = new SimpleActionBuilder(sessionFunction, null)
+	def apply(sessionFunction: Session => Session) = new SimpleActionBuilder(sessionFunction)
 }
 
 /**
@@ -36,11 +36,8 @@ object SimpleActionBuilder {
  *
  * @constructor creates a SimpleActionBuilder
  * @param sessionFunction the function that will be executed by the simple action
- * @param next the action that will be executed after the simple action built by this builder
  */
-class SimpleActionBuilder(sessionFunction: Session => Session, next: ActorRef) extends ActionBuilder {
+class SimpleActionBuilder(sessionFunction: Session => Session) extends ActionBuilder {
 
-	def withNext(next: ActorRef) = new SimpleActionBuilder(sessionFunction, next)
-
-	def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new SimpleAction(sessionFunction, next)))
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new SimpleAction(sessionFunction, next)))
 }

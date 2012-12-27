@@ -43,7 +43,7 @@ object HttpRequestActionBuilder {
 			.map(_ => checks)
 			.getOrElse(HttpRequestActionBuilder.DEFAULT_HTTP_STATUS_CHECK :: checks)
 
-		new HttpRequestActionBuilder(requestName, requestBuilder, resolvedChecks, null)
+		new HttpRequestActionBuilder(requestName, requestBuilder, resolvedChecks)
 	}
 }
 
@@ -52,12 +52,9 @@ object HttpRequestActionBuilder {
  *
  * @constructor creates an HttpRequestActionBuilder
  * @param requestBuilder the builder for the request that will be sent
- * @param next the next action to be executed
- * @param checks the checks to be applied on the response
+ * @param checks the checks
  */
-class HttpRequestActionBuilder(requestName: Expression[String], requestBuilder: AbstractHttpRequestBuilder[_], checks: List[HttpCheck[_]], next: ActorRef) extends ActionBuilder {
+class HttpRequestActionBuilder(requestName: Expression[String], requestBuilder: AbstractHttpRequestBuilder[_], checks: List[HttpCheck[_]]) extends ActionBuilder {
 
-	private[gatling] def withNext(next: ActorRef) = new HttpRequestActionBuilder(requestName, requestBuilder, checks, next)
-
-	private[gatling] def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(HttpRequestAction(requestName, next, requestBuilder, checks, protocolConfigurationRegistry)))
+	private[gatling] def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(HttpRequestAction(requestName, next, requestBuilder, checks, protocolConfigurationRegistry)))
 }

@@ -29,7 +29,7 @@ object ExpPauseActionBuilder {
 	 * time unit in Seconds.  A 1 second delay is used because exponential distributions
 	 * are not defined at zero and 1 is the smallest positive Long.
 	 */
-	def apply(meanDuration: Duration) = new ExpPauseActionBuilder(meanDuration, null)
+	def apply(meanDuration: Duration) = new ExpPauseActionBuilder(meanDuration)
 }
 
 /**
@@ -38,13 +38,10 @@ object ExpPauseActionBuilder {
  *
  * @constructor create a new ExpPauseActionBuilder
  * @param meanDuration mean duration of the generated pause
- * @param next action that will be executed after the generated pause
  */
-class ExpPauseActionBuilder(meanDuration: Duration, next: ActorRef) extends ActionBuilder {
+class ExpPauseActionBuilder(meanDuration: Duration) extends ActionBuilder {
 
-	def withNext(next: ActorRef) = new ExpPauseActionBuilder(meanDuration, next)
-
-	def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
 		val meanDurationInMillis = meanDuration.toMillis
 		val delayGenerator: () => Long = createExpRandomLongGenerator(meanDurationInMillis)
 

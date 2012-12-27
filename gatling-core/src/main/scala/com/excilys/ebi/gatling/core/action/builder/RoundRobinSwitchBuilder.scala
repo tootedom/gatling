@@ -24,16 +24,14 @@ import akka.actor.{ ActorRef, Props }
 
 object RoundRobinSwitchBuilder {
 
-	def apply(possibilities: List[ChainBuilder]) = new RoundRobinSwitchBuilder(possibilities, null)
+	def apply(possibilities: List[ChainBuilder]) = new RoundRobinSwitchBuilder(possibilities)
 }
 
-class RoundRobinSwitchBuilder(possibilities: List[ChainBuilder], next: ActorRef) extends ActionBuilder {
+class RoundRobinSwitchBuilder(possibilities: List[ChainBuilder]) extends ActionBuilder {
 
 	require(possibilities.size >= 2, "Can't build a round robin switch with less than 2 possibilities")
 
-	def withNext(next: ActorRef) = new RoundRobinSwitchBuilder(possibilities, next)
-
-	def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
 
 		val possibleActions = possibilities.map(_.withNext(next).build(protocolConfigurationRegistry))
 

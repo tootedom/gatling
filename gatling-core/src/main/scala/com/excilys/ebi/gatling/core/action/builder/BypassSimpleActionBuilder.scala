@@ -28,7 +28,7 @@ object BypassSimpleActionBuilder {
 	 *
 	 * @param sessionFunction the function that will be executed by the built simple action
 	 */
-	def apply(sessionFunction: Session => Session) = new BypassSimpleActionBuilder(sessionFunction, null)
+	def apply(sessionFunction: Session => Session) = new BypassSimpleActionBuilder(sessionFunction)
 }
 
 /**
@@ -36,11 +36,8 @@ object BypassSimpleActionBuilder {
  *
  * @constructor creates a SimpleActionBuilder
  * @param sessionFunction the function that will be executed by the simple action
- * @param next the action that will be executed after the simple action built by this builder
  */
-class BypassSimpleActionBuilder(sessionFunction: Session => Session, next: ActorRef) extends ActionBuilder {
+class BypassSimpleActionBuilder(sessionFunction: Session => Session) extends ActionBuilder {
 
-	def withNext(next: ActorRef) = new SimpleActionBuilder(sessionFunction, next)
-
-	def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new SimpleAction(sessionFunction, next) with Bypass))
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new SimpleAction(sessionFunction, next) with Bypass))
 }

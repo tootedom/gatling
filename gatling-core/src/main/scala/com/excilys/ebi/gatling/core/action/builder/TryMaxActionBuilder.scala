@@ -28,14 +28,12 @@ object TryMaxActionBuilder {
 	/**
 	 * Creates an initialized TryMaxActionBuilder
 	 */
-	def apply(times: Int, loopNext: ChainBuilder, counterName: String) = new TryMaxActionBuilder(times, loopNext, counterName, null)
+	def apply(times: Int, loopNext: ChainBuilder, counterName: String) = new TryMaxActionBuilder(times, loopNext, counterName)
 }
 
-class TryMaxActionBuilder(times: Int, loopNext: ChainBuilder, counterName: String, next: ActorRef) extends ActionBuilder {
+class TryMaxActionBuilder(times: Int, loopNext: ChainBuilder, counterName: String) extends ActionBuilder {
 
-	def withNext(next: ActorRef) = new TryMaxActionBuilder(times, loopNext, counterName, next)
-
-	def build(protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
+	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = {
 		val tryMaxActor = system.actorOf(Props(TryMaxAction(times, next, counterName)))
 		val loopContent = loopNext.withNext(tryMaxActor).build(protocolConfigurationRegistry)
 		tryMaxActor ! loopContent
