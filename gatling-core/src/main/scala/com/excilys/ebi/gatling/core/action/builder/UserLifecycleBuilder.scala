@@ -22,12 +22,10 @@ import akka.actor.{ ActorRef, Props }
 
 object UserLifecycleBuilder {
 
-	val start = new StartUserBuilder
+	val start = new ActionBuilder {
+
+		def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new StartUser(next)))
+	}
 
 	val end = system.actorOf(Props(EndUser))
-}
-
-class StartUserBuilder extends ActionBuilder {
-
-	def build(next: ActorRef, protocolConfigurationRegistry: ProtocolConfigurationRegistry) = system.actorOf(Props(new StartUser(next)))
 }

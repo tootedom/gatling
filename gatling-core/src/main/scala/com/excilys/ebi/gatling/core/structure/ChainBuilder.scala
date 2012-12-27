@@ -20,9 +20,6 @@ import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 
 import akka.actor.ActorRef
 
-/**
- * ChainBuilder class companion
- */
 object ChainBuilder {
 	
 	val emptyChain = new ChainBuilder(Nil)
